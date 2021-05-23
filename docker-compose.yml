@@ -17,7 +17,7 @@ services:
       REDIS_HOST: '${REDIS_HOST}'
     networks:
       - nextcloud
-#      - nginx-pm_default
+      - nginx-pm_default
     depends_on:
       - mysql
       - redis
@@ -29,7 +29,7 @@ services:
       - ./data/nextcloud:/var/www/html
     networks:
       - nextcloud
-    #      - nginx-pm_default
+      - nginx-pm_default
     entrypoint: /cron.sh
     depends_on:
       - mysql
@@ -60,8 +60,8 @@ services:
       - nextcloud
 
 networks:
-#  nginx-pm_default:
-#    external:
-#      name: nginx-pm_default
+  nginx-pm_default:
+    external:
+      name: nginx-pm_default
   nextcloud:
     driver: bridge
