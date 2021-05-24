@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  nexcloud:
+  nextcloud:
     image: nextcloud:apache
     restart: always
     ports:
