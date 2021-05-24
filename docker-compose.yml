@@ -16,8 +16,8 @@ services:
 
       REDIS_HOST: '${REDIS_HOST}'
     networks:
-      - nextcloud
       - nginx-pm_default
+      - nextcloud
     depends_on:
       - mysql
       - redis
@@ -28,8 +28,8 @@ services:
     volumes:
       - ./data/nextcloud:/var/www/html
     networks:
-      - nextcloud
       - nginx-pm_default
+      - nextcloud
     entrypoint: /cron.sh
     depends_on:
       - mysql
