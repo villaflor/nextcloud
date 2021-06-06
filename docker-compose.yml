@@ -1,7 +1,7 @@
-version: '3'
-
+version: '3.7'
 services:
   nextcloud:
+    container_name: 'nextcloud_app'
     image: nextcloud:apache
     restart: always
     ports:
@@ -9,59 +9,40 @@ services:
     volumes:
       - ./data/nextcloud:/var/www/html
     environment:
-      MYSQL_HOST: '${DB_HOST}'
-      MYSQL_PASSWORD: '${DB_PASSWORD}'
-      MYSQL_USER: '${DB_USERNAME}'
-      MYSQL_DATABASE: '${DB_DATABASE}'
+      - MYSQL_HOST=${DB_HOST}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_DATABASE=${DB_DATABASE}
 
-      REDIS_HOST: '${REDIS_HOST}'
+      - REDIS_HOST=${REDIS_HOST}
     networks:
-      - nginx-pm_default
+      - nginx_pm
+      - backend
       - nextcloud
+    healthcheck:
+      test: curl --fail -s http://localhost:80/ || exit 1
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
     depends_on:
-      - mysql
-      - redis
-
+      - cron
   cron:
+    container_name: 'nextcloud_cron'
     image: nextcloud:apache
     restart: always
     volumes:
       - ./data/nextcloud:/var/www/html
     networks:
-      - nginx-pm_default
+      - backend
       - nextcloud
     entrypoint: /cron.sh
-    depends_on:
-      - mysql
-      - redis
-
-  mysql:
-    image: mariadb
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
-    restart: always
-    ports:
-      - '${FORWARD_DB_PORT:-3306}:3306'
-    volumes:
-      - ./data/mysql:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-      MYSQL_PASSWORD: '${DB_PASSWORD}'
-      MYSQL_USER: '${DB_USERNAME}'
-      MYSQL_DATABASE: '${DB_DATABASE}'
-    networks:
-      - nextcloud
-
-  redis:
-    image: redis:alpine
-    restart: always
-    ports:
-      - '${FORWARD_REDIS_PORT:-6379}:6379'
-    networks:
-      - nextcloud
-
 networks:
-  nginx-pm_default:
+  nginx_pm:
     external:
-      name: nginx-pm_default
+      name: nginx_pm_network
+  backend:
+    external:
+      name: backend_network
   nextcloud:
-    driver: bridge
+    name: nextcloud_network
+
